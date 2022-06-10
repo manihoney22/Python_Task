@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Get Latest Sourcecode') {
+            steps {
+	        git clone 'https://github.com/manihoney22/Python_Task.git'
+            }
+        }
+        stage('Set Terraform path') {
+            steps {
+                script {
+                    def tfHome = tool name: 'terraform'
+                    env.path = "${tfHome}: ${env.PATH}"
+                }
+            }
+        }
+        
+        stage('terraform init') {
+            steps {
+                dir ("app.py") {
+                     script {
+                        withAWS(roleAccount: '460625009930' , role: 'jenkins_role',useNode:)
+                        sh 'terraform init -no-color'
+                     }
+                    
+            }
+            stage('terraform plan') {
+            steps {
+                dir ("app.py") {
+                     script {
+                        withAWS(roleAccount: '460625009930' , role: 'jenkins_role',useNode:)
+                        sh 'terraform plan -no-color -out=plan.out'
+                     }
+
+                }   
+
+            stage('terraform Apply') {
+            steps {
+                dir ("app.py") {
+                     script {
+                        withAWS(roleAccount: '460625009930' , role: 'jenkins_role',useNode:true){
+                        sh 'terraform apply -no-color -auto=approve plan.out'
+                        sh "terraform output"
+                     }
+
+                }
+            }         
+    }
+}
+
+
+
+
